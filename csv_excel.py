@@ -11,10 +11,10 @@ from pathlib import Path
 
 
 # Directory where CSV files are located
-csv_directory = '/home/appcoder/csvs-tv/'
+csv_directory = '/home/sysboss/csvs-tv/'
 
 # Directory where the merged Excel files will be saved
-excel_directory = '/home/appcoder/excels-tv/'
+excel_directory = '/home/sysboss/excels-tv/'
 
 # Function to delete all files from a folder
 def remove_files(directory_path):
