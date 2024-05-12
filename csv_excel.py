@@ -1,4 +1,6 @@
-#version 1
+#DATE: 09/05/2024
+#VERSION: 1.0
+
 
 
 import os
@@ -28,16 +30,17 @@ def remove_files(directory_path):
 
 # Function to merge CSV files into an Excel file
 def merge_csv_to_excel(csv_files, csv_directory, excel_directory):
-    dfs = []
+    dfs = {}
     for csv_file in csv_files:
         csv_file_path = os.path.join(csv_directory, csv_file)
         try:
+            sheetname = os.path.splitext(os.path.basename(csv_file))[0]
             df = pd.read_csv(csv_file_path)
-            dfs.append(df)
+            dfs[sheetname] = pd.read_csv(csv_file_path)
         except Exception as e:
             print(f'Failed to read {csv_file_path}. Reason: {str(e)}')
     
-    if len(dfs) >= 2:
+    if len(dfs) >= 3:
         try:
             for csv_file in csv_files:
                 if 'Performance' in csv_file:
@@ -47,10 +50,9 @@ def merge_csv_to_excel(csv_files, csv_directory, excel_directory):
                 raise ValueError("No CSV file containing 'Performance' in its filename found.")
             excel_file_path = os.path.join(excel_directory, excel_filename)
             with pd.ExcelWriter(excel_file_path) as writer:
-                for i, df in enumerate(dfs):
-                    df.to_excel(writer, sheet_name=f'Sheet{i+1}', index=False)
+                for sheet_name, df in dfs.items():
+                    df.to_excel(writer, sheet_name=sheet_name, index=False)
                 print(f'Merged Excel file saved to: {excel_file_path}')
-                remove_files(csv_directory)
                 remove_files(csv_directory)
         except Exception as e:
             print(f'Failed to merge CSV files. Reason: {str(e)}')
@@ -59,7 +61,8 @@ def merge_csv_to_excel(csv_files, csv_directory, excel_directory):
 while True:
     try:
         csv_files = [file for file in os.listdir(csv_directory) if file.endswith('.csv')]
-        if len(csv_files) >= 2:
+        csv_files.sort(key=lambda x: os.path.getctime(os.path.join(csv_directory, x)))
+        if len(csv_files) >= 3:
             merge_csv_to_excel(csv_files, csv_directory, excel_directory)
         else:
             time.sleep(2)  
